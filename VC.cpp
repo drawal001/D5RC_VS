@@ -2,7 +2,7 @@
 
 VisualController::VisualController() {
 	// topC
-	// ¼ĞÇ¯Ä£°å
+	// å¤¹é’³æ¨¡æ¿
 	_clamp.img = cv::imread("./model/clampTemplate/clamp.png", 0);
 	_clamp.center = cv::Point2f(324.0f, 119.0f);
 	_clamp.point = cv::Point2f(328.2f, 212.9f);
@@ -13,33 +13,33 @@ VisualController::VisualController() {
 	fs2["descriptors"] >> _clamp.descriptors;
 	fs2.release();
 
-	// ÖĞºÅÇ¯¿ÚÄ£°å
+	// ä¸­å·é’³å£æ¨¡æ¿
 	HalconCpp::ReadShapeModel("./model/jawTemplate/shm/Temp_DL.shm", &_jawMid.temp_dl);
 	HalconCpp::ReadShapeModel("./model/jawTemplate/shm/Temp_DR.shm", &_jawMid.temp_dr);
 
-	// Ç¯¿Ú¿â¶¨Î»Ä£°å
+	// é’³å£åº“å®šä½æ¨¡æ¿
 	_posTemplate_2 = cv::imread("./model/posTemplate/PosTemple_2.png", 0);
 
-	// ´Ö¶¨Î»µã£¬Ïà¶ÔÓÚ_roiPos¶øÑÔ
+	// ç²—å®šä½ç‚¹ï¼Œç›¸å¯¹äº_roiPosè€Œè¨€
 	_roughPosPoint = cv::Point2f(450, 1050);
 
 
 	// botC
-	// ¼ĞÇ¯Ä£°å
+	// å¤¹é’³æ¨¡æ¿
 	_clampBot.model = cv::imread("./model/botCTemplate/clamp_bot.png", 0);
-	_clampBot.pos.push_back(cv::Point2f(93.9549, 95.2925));
-	_clampBot.pos.push_back(cv::Point2f(513.976, 91.9765));
+	_clampBot.pos.push_back(cv::Point2f(93.9549f, 95.2925f));
+	_clampBot.pos.push_back(cv::Point2f(513.976f, 91.9765f));
 
-	// Ç¯¿Ú¿âÆ½Ì¨Ë®Æ½Ïß
-	_jawLibLine_a = -0.00116294;
-	_jawLibLine_b = 1718.94;
-	// Í¼ÏñÓëÏÔÊ¾Ó³Éä²ÎÊı
+	// é’³å£åº“å¹³å°æ°´å¹³çº¿
+	_jawLibLine_a = -0.00116294f;
+	_jawLibLine_b = 1718.94f;
+	// å›¾åƒä¸æ˜¾ç¤ºæ˜ å°„å‚æ•°
 	_mapParam = 0.00945084;
 }
 VisualController::~VisualController() {}
 
 /**
- * @brief ½«OpenCV Mat¸ñÊ½µÄÍ¼Æ¬×ª»»³ÉHalcon HObject¸ñÊ½
+ * @brief å°†OpenCV Matæ ¼å¼çš„å›¾ç‰‡è½¬æ¢æˆHalcon HObjectæ ¼å¼
  * @param img
  * @return
  */
@@ -58,7 +58,7 @@ HalconCpp::HObject VisualController::Mat2HImage(cv::Mat img) {
 	return ho_img;
 }
 /**
- * @brief ½«Halcon HObject¸ñÊ½×ª»»ÎªOpenCV Mat¸ñÊ½
+ * @brief å°†Halcon HObjectæ ¼å¼è½¬æ¢ä¸ºOpenCV Matæ ¼å¼
  * @param img
  * @return
  */
@@ -81,7 +81,7 @@ cv::Mat VisualController::HImage2Mat(HalconCpp::HObject img) {
 
 }
 /**
- * @brief ·Ö¸îÇ¯¿Ú¿â£¬¸üĞÂÀàÄÚÇ¯¿Ú¿âroiĞÅÏ¢
+ * @brief åˆ†å‰²é’³å£åº“ï¼Œæ›´æ–°ç±»å†…é’³å£åº“roiä¿¡æ¯
  * @param img
  * @param index
  */
@@ -95,7 +95,7 @@ void VisualController::JawLibSegmentation(cv::Mat img, int index) {
 	case 2:
 		cv::matchTemplate(img, _posTemplate_2, result, cv::TM_CCOEFF_NORMED);
 		cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
-		// ²âÊÔÆ¥ÅäĞ§¹û
+		// æµ‹è¯•åŒ¹é…æ•ˆæœ
 		//cv::rectangle(img, maxLoc, cv::Point(maxLoc.x + 280, maxLoc.y + 280), cv::Scalar(0), 4);
 		//cv::namedWindow("test", cv::WINDOW_NORMAL);
 		//cv::resizeWindow("test", cv::Size(1300, 1000));
@@ -109,10 +109,10 @@ void VisualController::JawLibSegmentation(cv::Mat img, int index) {
 	}
 }
 /**
- * @brief ¸ù¾İÏÖÓĞµÄÄ£°å½øĞĞSIFTÆ¥Åä£¬·µ»ØÄ£°åÖĞ¶¨Î»µãÔÚimgÖĞµÄÎ»ÖÃĞÅÏ¢
+ * @brief æ ¹æ®ç°æœ‰çš„æ¨¡æ¿è¿›è¡ŒSIFTåŒ¹é…ï¼Œè¿”å›æ¨¡æ¿ä¸­å®šä½ç‚¹åœ¨imgä¸­çš„ä½ç½®ä¿¡æ¯
  * @param img
  * @param m
- * @return pst, Æ¥ÅäÊ§°ÜÔò·µ»Ø¿Õ
+ * @return pst, åŒ¹é…å¤±è´¥åˆ™è¿”å›ç©º
  */
 std::vector<cv::Point2f> VisualController::SIFT(cv::Mat img, Models m) {
 	cv::Mat model;
@@ -141,14 +141,14 @@ std::vector<cv::Point2f> VisualController::SIFT(cv::Mat img, Models m) {
 	cv::Rect roi = cv::Rect(static_cast<cv::Point>(_roiPos), cv::Size(850, 2046 - static_cast<int>(_roiPos.y)));
 	cv::Mat ROI = img(roi).clone();
 
-	// SIFTÌØÕ÷µã
+	// SIFTç‰¹å¾ç‚¹
 	cv::Ptr<cv::SIFT> sift = cv::SIFT::create();
 	std::vector<cv::KeyPoint> keyPoints_Img;
 	sift->detect(ROI, keyPoints_Img);
-	// ÃèÊö
+	// æè¿°
 	cv::Mat descriptors_Img;
 	sift->compute(ROI, keyPoints_Img, descriptors_Img);
-	// Æ¥Åä
+	// åŒ¹é…
 	cv::Ptr<cv::DescriptorMatcher> matcher =
 		cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE);
 	std::vector<std::vector<cv::DMatch>> knn_matches;
@@ -160,7 +160,7 @@ std::vector<cv::Point2f> VisualController::SIFT(cv::Mat img, Models m) {
 			goodMatches.push_back(knn_matche[0]);
 		}
 	}
-	// ÏÔÊ¾Æ¥Åä½á¹û
+	// æ˜¾ç¤ºåŒ¹é…ç»“æœ
 	//cv::Mat img_matches_res;
 	//cv::drawMatches(model, keyPoints_Model, ROI, keyPoints_Img, goodMatches, img_matches_res, cv::Scalar::all(-1),
 	//	cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
@@ -184,7 +184,7 @@ std::vector<cv::Point2f> VisualController::SIFT(cv::Mat img, Models m) {
 		p.y += _roiPos.y;
 		pst_Global.push_back(p);
 	}
-	// ²âÊÔÆ¥ÅäĞ§¹û
+	// æµ‹è¯•åŒ¹é…æ•ˆæœ
 	//cv::line(img, pst_Global[0], pst_Global[1], cv::Scalar(0), 4);
 	//cv::imshow("test", img);
 	//cv::waitKey(0);
@@ -192,17 +192,17 @@ std::vector<cv::Point2f> VisualController::SIFT(cv::Mat img, Models m) {
 
 }
 /**
- * @brief ¸üĞÂÆ½Ì¨Ë®Æ½Ïß
+ * @brief æ›´æ–°å¹³å°æ°´å¹³çº¿
  * @param img
- * @param index 1£ºÇ¯¿Ú¿â 2£ºÎïÁÏÌ¨
+ * @param index 1ï¼šé’³å£åº“ 2ï¼šç‰©æ–™å°
  */
 void VisualController::GetHorizontalLine(cv::Mat img, int index) {
-	// ½«Ç¯¿ÚÌ¨ÏÂ°ë²¿·ÖÕÚ×¡£¬·ÀÖ¹¸ÉÈÅ£¬¾ßÌåÊ¹ÓÃ¸ù¾İÇ¯¿ÚÌ¨ÓëÏà»ú¸ß¶È¶ø¶¨
+	// å°†é’³å£å°ä¸‹åŠéƒ¨åˆ†é®ä½ï¼Œé˜²æ­¢å¹²æ‰°ï¼Œå…·ä½“ä½¿ç”¨æ ¹æ®é’³å£å°ä¸ç›¸æœºé«˜åº¦è€Œå®š
 	cv::Point2f roiPos(200, 1500);
 	cv::Rect roi = cv::Rect(roiPos, cv::Size(2200, 548));
 	cv::Mat ROI = img(roi).clone();
 
-	// Í¼Ïñ´¦Àí
+	// å›¾åƒå¤„ç†
 	cv::Mat gauss;
 	cv::GaussianBlur(ROI, gauss, cv::Size(5, 5), 25);
 	cv::Mat bin;
@@ -210,7 +210,7 @@ void VisualController::GetHorizontalLine(cv::Mat img, int index) {
 	cv::Mat edge;
 	cv::Canny(bin, edge, 50, 150);
 
-	//// ²âÊÔĞ§¹û
+	//// æµ‹è¯•æ•ˆæœ
 	//cv::imshow("test", ROI);
 	//cv::waitKey(0);
 	//cv::imshow("test", bin);
@@ -221,8 +221,8 @@ void VisualController::GetHorizontalLine(cv::Mat img, int index) {
 	std::vector<cv::Vec4f> lines;
 	cv::HoughLinesP(edge, lines, 1, CV_PI / 180, 200, 500, 300);
 	std::cout << lines.size() << std::endl;
-	// ×îĞ¡¶ş³ËÄâºÏ
-	int n = lines.size() * 2;
+	// æœ€å°äºŒä¹˜æ‹Ÿåˆ
+	size_t n = lines.size() * 2;
 	float sum_x = 0, sum_y = 0, sum_xy = 0, sum_x2 = 0;
 	for (auto& line : lines) {
 		sum_x += (line[0] + line[2] + 2 * roiPos.x);
@@ -238,7 +238,7 @@ void VisualController::GetHorizontalLine(cv::Mat img, int index) {
 		_jawLibLine_a = (sum_xy - n * mean_x * mean_y) / (sum_x2 - n * mean_x * mean_x);
 		_jawLibLine_b = (mean_y - _jawLibLine_a * mean_x);
 
-		//// ²âÊÔÄâºÏĞ§¹û
+		//// æµ‹è¯•æ‹Ÿåˆæ•ˆæœ
 		//cv::line(img, cv::Point2f(50, 50 * _jawLibLine_a + _jawLibLine_b), 
 		//	cv::Point2f(2000, 2000 * _jawLibLine_a + _jawLibLine_b), cv::Scalar(0), 4);
 		//cv::namedWindow("a", cv::WINDOW_NORMAL);
@@ -252,7 +252,7 @@ void VisualController::GetHorizontalLine(cv::Mat img, int index) {
 	}
 }
 /**
- * @brief »ñÈ¡»úÆ÷ÈËzÖáÒÆ¶¯¾àÀë
+ * @brief è·å–æœºå™¨äººzè½´ç§»åŠ¨è·ç¦»
  * @param img
  * @param index
  * @return
@@ -272,14 +272,14 @@ double VisualController::GetVerticalDistance(cv::Mat img, int index) {
 	}
 	cv::matchTemplate(img, _clampBot.model, res, cv::TM_CCOEFF_NORMED);
 	cv::minMaxLoc(res, &minVal, &maxVal, &minLoc, &maxLoc);
-	cv::Point2f maxLoc_(maxLoc.x, maxLoc.y);
+	cv::Point2i maxLoc_(maxLoc.x, maxLoc.y);
 	double distance = 0;
 	for (int i = 0; i < _clampBot.pos.size(); ++i) {
 		distance += (abs(a * (_clampBot.pos[i].x + maxLoc_.x) -
 			_clampBot.pos[i].y - maxLoc_.y + b) / sqrt(a * a + 1));
 	}
 	distance /= _clampBot.pos.size();
-	// ²âÊÔĞ§¹û
+	// æµ‹è¯•æ•ˆæœ
 	//cv::rectangle(img, minLoc_, cv::Point2f(minLoc_.x + _clampBot.model.size().width, 
 	//	minLoc_.y + _clampBot.model.size().height), cv::Scalar(255), 4);
 	//cv::line(img, cv::Point2f(50, 50 * a + b), 
@@ -292,7 +292,7 @@ double VisualController::GetVerticalDistance(cv::Mat img, int index) {
 
 }
 /**
- * @brief »ñÈ¡jawÖĞĞÄ¶¨Î»ĞÅÏ¢
+ * @brief è·å–jawä¸­å¿ƒå®šä½ä¿¡æ¯
  * @param ho_img
  * @return {x, y, angle, flag}
  */
@@ -301,19 +301,19 @@ JawPos VisualController::GetJawPos(HalconCpp::HObject ho_img) {
 	HObject ho_search_ROI_DL, ho_search_ROI_DR, ho_ROI_DL, ho_ROI_DR, ho_init_search_rect, ho_ImageReduced;
 	HTuple hv_start, hv_range, hv_Height_DT, hv_Width_DT, hv_Height_DS, hv_Width_DS;
 
-	//²ÎÊıÉèÖÃ
+	//å‚æ•°è®¾ç½®
 	hv_start = -0.131;
 	hv_range = 0.262;
 
-	//Ä£°åsize
+	//æ¨¡æ¿size
 	hv_Height_DT = 200;
 	hv_Width_DT = 50;
 
-	//ËÑË÷size
+	//æœç´¢size
 	hv_Height_DS = 300;
 	hv_Width_DS = 150;
 
-	//ÉèÖÃÀúÊ·±äÁ¿
+	//è®¾ç½®å†å²å˜é‡
 	static HTuple hv_Last_Row_DL = 1000.0, hv_Last_Col_DL = 1000.0, hv_Last_Angle_DL = 0.0;
 	static HTuple hv_Last_Row_DR = 1000.0, hv_Last_Col_DR = 1000.0, hv_Last_Angle_DR = 0.0;
 	static bool firstTime = true;
@@ -416,7 +416,7 @@ TaskSpaceError VisualController::GetTaskSpaceError(cv::Mat img, MatchingMode m) 
 	float clampAngle = static_cast<float>(atan2f(clampPos[0].y - clampPos[1].y, clampPos[0].x - clampPos[1].x) * (-180) / CV_PI);
 	HalconCpp::HObject ho_img = Mat2HImage(img);
 	JawPos jawPos = GetJawPos(ho_img);
-	TaskSpaceError res;
+	TaskSpaceError res{};
 	switch (m)
 	{
 	case FINE:
@@ -434,10 +434,10 @@ TaskSpaceError VisualController::GetTaskSpaceError(cv::Mat img, MatchingMode m) 
 	default:
 		break;
 	}
-	// ²âÊÔ
+	// æµ‹è¯•
 	cv::namedWindow("test", cv::WINDOW_NORMAL);
 	cv::resizeWindow("test", cv::Size(1300, 1000));
-	cv::Point2f h_1(jawPos.x, jawPos.y);
+	cv::Point2d h_1(jawPos.x, jawPos.y);
 	int h_2_x = static_cast<int>(h_1.x - 100 * cos(jawPos.angle + CV_PI / 2));
 	int h_2_y = static_cast<int>(h_1.y - 100 * sin(jawPos.angle + CV_PI / 2));
 	cv::line(img, h_1, cv::Point(h_2_x, h_2_y), cv::Scalar(0), 4);
@@ -449,7 +449,7 @@ TaskSpaceError VisualController::GetTaskSpaceError(cv::Mat img, MatchingMode m) 
 
 }
 
-// ÀàÄÚ±äÁ¿½Ó¿Ú
+// ç±»å†…å˜é‡æ¥å£
 Clamp VisualController::GetClamp() { return _clamp; }
 
 Jaw VisualController::GetJaw() { return _jawMid; }
