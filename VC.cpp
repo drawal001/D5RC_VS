@@ -92,6 +92,7 @@ void VisualController::JawLibSegmentation(cv::Mat img, int index) {
 	switch (index)
 	{
 	case 1:
+		break;
 	case 2:
 		cv::matchTemplate(img, _posTemplate_2, result, cv::TM_CCOEFF_NORMED);
 		cv::minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
@@ -104,6 +105,7 @@ void VisualController::JawLibSegmentation(cv::Mat img, int index) {
 		_roiPos = cv::Point2f(maxLoc.x - 300.0f, maxLoc.y + 300.0f);
 		break;
 	case 3:
+		break;
 	default:
 		break;
 	}
@@ -252,8 +254,8 @@ void VisualController::GetHorizontalLine(cv::Mat img, int index) {
 	}
 }
 /**
- * @brief 获取机器人z轴移动距离
- * @param img
+ * @brief 获取机器人z轴移动距离，使用前先调用 GetHorizontalLine
+ * @param img 底部相机的图片
  * @param index
  * @return
  */
@@ -406,8 +408,8 @@ JawPos VisualController::GetJawPos(HalconCpp::HObject ho_img) {
 	return { hv_Col.D(), hv_Row.D(),hv_Angle.D(), flag };
 }
 /**
- * @brief
- * @param img
+ * @brief 获取误差，使用前先调用 JawLibSegmentation
+ * @param img 顶部相机的图片
  * @param m
  * @return
  */
@@ -426,8 +428,8 @@ TaskSpaceError VisualController::GetTaskSpaceError(cv::Mat img, MatchingMode m) 
 				(clampAngle - jawPos.angle * 180 / CV_PI - 90) };
 		break;
 	case ROUGH:
-		res = { (clampPos[0].y - jawPos.y) * _mapParam,
-				(clampPos[0].x - GetROIPos().x - GetRoughPosPoint().x) * _mapParam,
+		res = { (clampPos[0].y - GetROIPos().y - GetRoughPosPoint().y) * _mapParam,
+				(clampPos[0].x - jawPos.x) * _mapParam,
 				 0, 0,
 				(clampAngle - jawPos.angle * 180 / CV_PI - 90) };
 		break;
